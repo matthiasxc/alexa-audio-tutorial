@@ -1,0 +1,38 @@
+{
+    "version": "1.0",
+    "session": null,
+    "context": {
+        "System": {
+             "application": {
+                "applicationId": "amzn1.ask.skill.appID"
+            },
+            "user": {
+                "userId": "amzn1.ask.account.userid",
+                "accessToken": null
+            },
+            "device": {
+                "supportedInterfaces": {
+                    "AudioPlayer": {}
+                }
+            }
+        },
+        "AudioPlayer": {
+            "token": "First Audio File",
+            "offsetInMilliseconds": "122",
+            "playerActivity": "PLAYING"
+        }
+    },
+    "request": {
+        "token": "First Audio File",
+        "offsetInMilliseconds": "122",
+        "error": null,
+        "currentPlaybackState": null,
+        "enqueuedToken": null,
+        "HasEnqueuedItem": false,
+        "AudioRequestType": 3,
+        "type": "AudioPlayer.PlaybackNearlyFinished",
+        "requestId": "amzn1.echo-api.request.requestId",
+        "locale": "en-US",
+        "timestamp": "2017-03-31T20:32:43Z"
+    }
+}

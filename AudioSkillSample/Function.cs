@@ -28,8 +28,8 @@ namespace AudioSkillSample
             var log = context.Logger;
             // I use the following lines to log and validate my input
             //      but this isn't a requirement for the skill
-            //log.LogLine($"Skill Request Object...");
-            //log.LogLine(JsonConvert.SerializeObject(input));
+            log.LogLine($"Skill Request Object...");
+            log.LogLine(JsonConvert.SerializeObject(input));
 
             SkillResponse returnResponse = new SkillResponse();
             var audioItems = AudioAssets.GetSampleAudioFiles();
@@ -38,42 +38,36 @@ namespace AudioSkillSample
             //  this also initialized the context for the DynamoDB helper
             var audioStateHelper = new AudioStateHelper();
             await audioStateHelper.VerifyTable();
-            
-            var lastState = await audioStateHelper.GetAudioState(input.Session.User.UserId);
-
-            var currentState = new AudioState() { UserId = input.Session.User.UserId };
-            if (lastState == null)
-            {
-                log.LogLine($"Creating default audio state for " + input.Session.User.UserId);
-                currentState.State = Constants.SetDefaultState();
-            }
+            string userId = "";
+            if (input.Session != null)
+                userId = input.Session.User.UserId;
             else
-            {
-                log.LogLine($"Copying last state to current state for " + input.Session.User.UserId);
-                currentState.State = lastState.State;
-            }
+                userId = input.Context.System.User.UserId;
+
             
-            // Let's differentiate our input types
-            // We can have a couple of request types
-            //  - Request to launch
-            //  - Request for an intent 
-            //  - Request directed at an audio player
-            //    Audio player requests can be one of several kinds
-            //      - Playback started
-            //      - Playback finished
-            //      - Playback nearly finished (let you queue up the next item in the playlist)
-            //      - Playback stopped
-            //      - Playback failed
+            var lastState = await audioStateHelper.GetAudioState(userId);
+
+            var currentState = new AudioState() { UserId = userId };
+            currentState.State = lastState.State;
 
             // For an intent 
             if (input.GetRequestType() == typeof(LaunchRequest))
             {
                 log.LogLine($"Default LaunchRequest made");
-                var output = new PlainTextOutputSpeech() { Text = "Welcome to the Alexa audio sample. You can say, play the audio, to begin." };
-                var reprompt = new Reprompt() { OutputSpeech = new PlainTextOutputSpeech() { Text = "You can say, play the audio, to begin." } };
+                var output = new PlainTextOutputSpeech()
+                    {
+                        Text = "Welcome to the Alexa audio sample. " 
+                        + "You can say, play the audio, to begin."
+                    };
+                var reprompt = new Reprompt()
+                    {
+                        OutputSpeech = new PlainTextOutputSpeech()
+                            {
+                                Text = "You can say, play the audio, to begin."
+                            }
+                    };
                 returnResponse = ResponseBuilder.Ask(output, reprompt);
 
-                log.LogLine($"Response: Text = 'Welcome to the Alexa audio sample. You can say, Alexa, use podcast player to play the audio.', Reprompt = 'You can say, play the audio, to begin.' ");
                 await audioStateHelper.SaveAudioState(currentState);
             }
             else if (input.GetRequestType() == typeof(IntentRequest))
@@ -88,23 +82,26 @@ namespace AudioSkillSample
                         currentState.State.Token = audioItems.FirstOrDefault().Title;
                         currentState.State.State = "PLAY_MODE";
                         currentState.State.playOrder = new List<int> { 0, 1, 2, 3, 4 };
-                        returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll, 
-                                                                         audioItems[currentState.State.Index].Url, 
-                                                                         currentState.State.Token);                        
+                        returnResponse = ResponseBuilder.AudioPlayerPlay(
+                            PlayBehavior.ReplaceAll, 
+                            audioItems[currentState.State.Index].Url, 
+                            currentState.State.Token);                        
                         
-                        await audioStateHelper.SaveAudioState(currentState);
                         break;
-                    case BuiltInIntent.Cancel:
-                        currentState.State.State = "PAUSE_MODE";
-                        returnResponse = ResponseBuilder.AudioPlayerStop();
-                        await audioStateHelper.SaveAudioState(currentState);
-                        break;
+
                     case BuiltInIntent.Help:
                         output.Text = "You can say, play the audio, to begin.";
                         reprompt.OutputSpeech = new PlainTextOutputSpeech() { Text = "You can say, play the audio, to begin." };
                         returnResponse = ResponseBuilder.Ask(output, reprompt);
-                        log.LogLine($"Response: Text = 'You can say, play the audio to begin.', Reprompt = 'You can say, play the audio, to begin.' ");
                         break;
+
+                    case BuiltInIntent.Cancel:
+                        currentState.State.OffsetInMS = Convert.ToInt32(input.Context.AudioPlayer.OffsetInMilliseconds);
+                        currentState.State.Token = input.Context.AudioPlayer.Token;
+                        currentState.State.State = "PAUSE_MODE";
+                        returnResponse = ResponseBuilder.AudioPlayerStop();
+                        break;
+
                     case BuiltInIntent.Next:
                         var thisFile = lastState.State.Token;
                         // get the last state, get the index, add 1 
@@ -118,29 +115,20 @@ namespace AudioSkillSample
                         returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll,
                                                                          audioItems[currentState.State.Index].Url,
                                                                          currentState.State.Token);
-                        await audioStateHelper.SaveAudioState(currentState);
-
                         break;
+
                     case BuiltInIntent.Previous:
                         // get the last state, get the index, subtract 1
                         currentState.State.Index = currentState.State.Index - 1;
                         if (currentState.State.Index < 0)
-                        {
                             currentState.State.Index = 0;
-                            output.Text = "This is the first item in the playlist.";
-                            returnResponse = ResponseBuilder.Tell(output);
-                        }
-                        else
-                        {
-                            currentState.State.Token = audioItems[currentState.State.Index].Title;
-                            currentState.State.OffsetInMS = 0;
-                            currentState.State.State = "PLAY_MODE";
-                            returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll,
+
+                        currentState.State.Token = audioItems[currentState.State.Index].Title;
+                        currentState.State.OffsetInMS = 0;
+                        currentState.State.State = "PLAY_MODE";
+                        returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll,
                                                                              audioItems[currentState.State.Index].Url,
                                                                              currentState.State.Token);
-                        }
-
-                        await audioStateHelper.SaveAudioState(currentState);
                         break;
                     case BuiltInIntent.Repeat:
                         // get the last state, get the index, start over at offset = 0
@@ -151,22 +139,26 @@ namespace AudioSkillSample
                                                                              audioItems[currentState.State.Index].Url,
                                                                              currentState.State.Token, 
                                                                              0);
-                        await audioStateHelper.SaveAudioState(currentState);
                         break;
+
                     case BuiltInIntent.StartOver:
-                        // get the last state, get the index, start over at offset = 0
-                        currentState.State.Token = audioItems[currentState.State.Index].Title;
+                        // start everything from the beginning
+                        currentState.State.Token = audioItems[0].Title;
                         currentState.State.OffsetInMS = 0;
                         currentState.State.State = "PLAY_MODE";
                         returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll,
-                                                                             audioItems[currentState.State.Index].Url,
+                                                                             audioItems[0].Url,
                                                                              currentState.State.Token,
                                                                              0);
-                        await audioStateHelper.SaveAudioState(currentState);
                         break;
+
                     case BuiltInIntent.Stop:
+                        currentState.State.OffsetInMS = Convert.ToInt32(input.Context.AudioPlayer.OffsetInMilliseconds);
+                        currentState.State.Token = input.Context.AudioPlayer.Token;
+                        currentState.State.State = "PAUSE_MODE";
                         returnResponse = ResponseBuilder.AudioPlayerStop();
                         break;
+
                     case BuiltInIntent.Resume:
                         // Get the last state, start from the offest in milliseconds
 
@@ -174,13 +166,36 @@ namespace AudioSkillSample
                                                                             audioItems[currentState.State.Index].Url,
                                                                             currentState.State.Token,
                                                                             currentState.State.OffsetInMS);
+                        // If there was an enqueued item...
+                        if (currentState.State.EnqueuedToken != null)
+                        {
+                            returnResponse.Response.Directives.Add(new AudioPlayerPlayDirective()
+                            {
+                                PlayBehavior = PlayBehavior.Enqueue,
+                                AudioItem = new Alexa.NET.Response.Directive.AudioItem()
+                                {
+                                    Stream = new AudioItemStream()
+                                    {
+                                        Url = audioItems[currentState.State.Index + 1].Url,
+                                        Token = audioItems[currentState.State.Index + 1].Title,
+                                        ExpectedPreviousToken = currentState.State.Token,
+                                        OffsetInMilliseconds = 0
+                                    }
+                                }
+                            });
+                        }
 
+                        currentState.State.EnqueuedToken = audioItems[currentState.State.Index + 1].Title;
                         currentState.State.State = "PLAY_MODE";
-                        await audioStateHelper.SaveAudioState(currentState);
                         break;
+
                     case BuiltInIntent.Pause:
+                        currentState.State.OffsetInMS = Convert.ToInt32(input.Context.AudioPlayer.OffsetInMilliseconds);
+                        currentState.State.Token = input.Context.AudioPlayer.Token;
+                        currentState.State.State = "PAUSE_MODE";
                         returnResponse = ResponseBuilder.AudioPlayerStop();
                         break;
+
                     default:
                         log.LogLine($"Unknown intent: " + intentRequest.Intent.Name);
                         output.Text = "Welcome to Pocast Player";
@@ -204,9 +219,21 @@ namespace AudioSkillSample
                 {
                     // Audio comes to an end on its own 
                     log.LogLine($"PlaybackFinished Triggered ");
-                    // respond with Stop or ClearQueue
-                    returnResponse = ResponseBuilder.AudioPlayerClearQueue(ClearBehavior.ClearEnqueued);
+                    if (currentState.State.EnqueuedToken != null)
+                    {
+                        int itemIndex = audioItems.IndexOf(audioItems.Where(i => i.Title == currentState.State.EnqueuedToken).FirstOrDefault());
+                        currentState.State.Token = audioItems[itemIndex].Title;
+                        currentState.State.Index = itemIndex;
+                        returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll,
+                            audioItems[itemIndex].Url,
+                            currentState.State.Token);                         
+                    }
+                    else
+                    {
+                        // respond with Stop or ClearQueue
+                        returnResponse = ResponseBuilder.AudioPlayerClearQueue(ClearBehavior.ClearEnqueued);
 
+                    }
                 }
                 else if (audioRequest.AudioRequestType == AudioRequestType.PlaybackStopped)
                 {
@@ -214,12 +241,10 @@ namespace AudioSkillSample
                     log.LogLine($"PlaybackStopped Triggered ");
                     currentState.State.State = "PAUSE_MODE";
                     currentState.State.Token = audioRequest.Token;
+                    currentState.State.EnqueuedToken = audioRequest.EnqueuedToken;
                     currentState.State.OffsetInMS = Convert.ToInt32(audioRequest.OffsetInMilliseconds);
-                    // respond with Stop or ClearQueue
-                    returnResponse = ResponseBuilder.AudioPlayerStop();
                     log.LogLine($"Saving AudioState: " + currentState.State.Token + " at " + currentState.State.OffsetInMS.ToString() + "ms");
-
-                    await audioStateHelper.SaveAudioState(currentState);
+                    returnResponse = null;
                 }
                 else if (audioRequest.AudioRequestType == AudioRequestType.PlaybackNearlyFinished)
                 {
@@ -241,9 +266,16 @@ namespace AudioSkillSample
                     if (itemIndex == audioItems.Count)
                         itemIndex = 0;
 
+                    currentState.State.EnqueuedToken = audioItems[itemIndex].Title;
+                    currentState.State.Token = audioRequest.Token;
                     // if there is not, we send a play intent with "ENQUEUE"
-                    returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.Enqueue, audioItems[itemIndex].Url, audioItems[itemIndex].Title, audioRequest.Token, 0);
-
+                    returnResponse = ResponseBuilder.AudioPlayerPlay(
+                                            PlayBehavior.Enqueue, 
+                                            audioItems[itemIndex].Url, 
+                                            currentState.State.EnqueuedToken, 
+                                            currentState.State.Token, 
+                                            0);
+                 
                 }
                 else if (audioRequest.AudioRequestType == AudioRequestType.PlaybackFailed)
                 {
@@ -252,25 +284,31 @@ namespace AudioSkillSample
                     //  file again on a failure
                     //  THIS IS A TERRIBLE SOLUTION
                     //  Figure out a better one for your skill
-                    returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll, audioItems.FirstOrDefault().Url, audioItems.FirstOrDefault().Title);
+                    currentState.State.Token = audioItems.FirstOrDefault().Title;
+                    currentState.State.Index = 0;
+                    currentState.State.State = "PLAY_MODE";
+                    returnResponse = ResponseBuilder.AudioPlayerPlay(PlayBehavior.ReplaceAll, audioItems.FirstOrDefault().Url, currentState.State.Token);
                 }
             }
-            
+
             // I use the following code to validate and log my outputs for
             //      later investigation
-            //log.LogLine($"Skill Response Object...");
-            //string responseJson = "no response is given";
-            //try
-            //{
-            //    responseJson = JsonConvert.SerializeObject(returnResponse);
-            //}
-            //catch
-            //{
-            //    log.LogLine(responseJson);
-            //    return null;
-            //}
-            //log.LogLine(responseJson);
+            log.LogLine($"Skill Response Object...");
+            string responseJson = "no response is given";
+            try
+            {
+                responseJson = JsonConvert.SerializeObject(returnResponse);
+            }
+            catch
+            {
+                log.LogLine(responseJson);
+                return null;
+            }
+            log.LogLine(responseJson);
 
+            // Save our state
+            await audioStateHelper.SaveAudioState(currentState);
+            // return our response
             return returnResponse;
         }
     }

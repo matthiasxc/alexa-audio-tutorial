@@ -1,0 +1,20 @@
+{
+    "version": "1.0",
+    "response": {
+        "shouldEndSession": true,
+        "directives": [
+            {
+                "playBehavior": "REPLACE_ALL",
+                "audioItem": {
+                    "stream": {
+                        "url": "https://matthiasshapiro.com/alexasamples/First.mp3",
+                        "token": "First Audio File",
+                        "expectedPreviousToken": null,
+                        "offsetInMilliseconds": 0
+                    }
+                },
+                "type": "AudioPlayer.Play"
+            }
+        ]
+    }
+}

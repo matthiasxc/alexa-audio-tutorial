@@ -1,0 +1,12 @@
+//note: there should be no response for this
+{
+    "version": "1.0",
+    "response": {
+        "shouldEndSession": true,
+        "directives": [
+            {
+                "type": "AudioPlayer.Stop"
+            }
+        ]
+    }
+}

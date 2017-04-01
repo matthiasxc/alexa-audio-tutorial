@@ -1,12 +1,12 @@
---temp-output:C:\Projects\Repos\alexa-audio-tutorial\AudioSkillSample\obj\Release\netcoreapp1.0\
---out:C:\Projects\Repos\alexa-audio-tutorial\AudioSkillSample\bin\Release\netcoreapp1.0\AudioSkillSample.dll
---define:RELEASE
+--temp-output:C:\Projects\Repos\alexa-audio-tutorial\AudioSkillSample\obj\Debug\netcoreapp1.0\
+--out:C:\Projects\Repos\alexa-audio-tutorial\AudioSkillSample\bin\Debug\netcoreapp1.0\AudioSkillSample.dll
+--define:DEBUG
 --define:TRACE
 --define:NETCOREAPP1_0
 --suppress-warning:CS1701
 --suppress-warning:CS1702
 --suppress-warning:CS1705
---optimize:True
+--optimize:False
 --output-name:AudioSkillSample
 --file-version:1.0.0.0
 --version:1.0.0.0

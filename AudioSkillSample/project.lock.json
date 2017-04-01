@@ -3,7 +3,7 @@
   "version": 2,
   "targets": {
     ".NETCoreApp,Version=v1.0": {
-      "Alexa.NET/1.0.0-beta-4": {
+      "Alexa.NET/1.0.0-beta-5": {
         "type": "package",
         "dependencies": {
           "NETStandard.Library": "1.6.0",
@@ -2326,12 +2326,12 @@
     }
   },
   "libraries": {
-    "Alexa.NET/1.0.0-beta-4": {
-      "sha512": "OgMB/ox3cxiuUTObcRD3m2WXvF+iRriJZ0bFQMpllrWjc4c7VP9IElaE8RBJ6dzi86E08ccNRJNo8CVNwr02rg==",
+    "Alexa.NET/1.0.0-beta-5": {
+      "sha512": "uRUDpngIX5K39FuLUp50C7cVj0U5bDjSsIabIbBTMu/4bo9zxaavIXFED8I9ZgzDegACcrAA9kSX0YMoHRXAFQ==",
       "type": "package",
-      "path": "Alexa.NET/1.0.0-beta-4",
+      "path": "Alexa.NET/1.0.0-beta-5",
       "files": [
-        "alexa.net.1.0.0-beta-4.nupkg.sha512",
+        "alexa.net.1.0.0-beta-5.nupkg.sha512",
         "alexa.net.nuspec",
         "lib/netstandard1.6/Alexa.NET.dll"
       ]
@@ -7313,7 +7313,7 @@
   "projectFileDependencyGroups": {
     "": [
       "AWSSDK.DynamoDBv2 >= 3.3.4.3",
-      "Alexa.NET >= 1.0.0-beta-4",
+      "Alexa.NET >= 1.0.0-beta-5",
       "Amazon.Lambda.Core >= 1.0.*",
       "Amazon.Lambda.Serialization.Json >= 1.0.1",
       "Amazon.Lambda.Tools >= 1.4.0",

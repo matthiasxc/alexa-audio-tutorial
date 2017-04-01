@@ -3,6 +3,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Lambda.Tools;
 using Amazon.Runtime;
 using AudioSkillSample.Models;
 using System;
@@ -15,9 +16,12 @@ namespace AudioSkillSample.Helpers
 {
     public class AudioStateHelper
     {
-        private string accessKey = "[your access key for dynamoDB permissions goes here]";
-        private string secretKey = "[your secret key for dynamoDB permissions goes here]";
-        
+        private string accessKey = "AKIAJOQ4PQKYSMBZSCAA";
+        private string secretKey = "ZmCcTX83fut96qfpHmgn2CyGUDOYq4mttZnl0UpD";
+
+        //private string accessKey = "[your access key for dynamoDB permissions goes here]";
+        //private string secretKey = "[your secret key for dynamoDB permissions goes here]";
+
         private static string dynamoDBTableName = "AudioStates";
         private static string hashKey = "UserId";
 
@@ -98,9 +102,14 @@ namespace AudioSkillSample.Helpers
             List<ScanCondition> conditions = new List<ScanCondition>();
             conditions.Add(new ScanCondition("UserId", ScanOperator.Equal, userId));
             var allDocs = await context.ScanAsync<AudioState>(conditions).GetRemainingAsync();
-            if (allDocs == null || allDocs.Count == 0)
-                return null;
-            return allDocs.FirstOrDefault();
+            if (allDocs != null && allDocs.Count != 0)
+            {
+                return allDocs.FirstOrDefault();
+            }
+
+            var initialState = new AudioState() { UserId = userId };
+            initialState.State = AudioSkillSample.Assets.Constants.SetDefaultState();
+            return initialState;
 
         }
 

@@ -1,0 +1,17 @@
+{
+    "version": "1.0",
+    "response": {
+        "outputSpeech": {
+            "type": "PlainText",
+            "text": "Welcome to the Alexa audio sample. You can say, play the audio, to begin."
+        },
+        "reprompt": {
+            "outputSpeech": {
+                "type": "PlainText",
+                "text": "You can say, play the audio, to begin."
+            }
+        },
+        "shouldEndSession": false,
+        "directives": []
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "version": "1.0",
+    "response": {
+        "shouldEndSession": true,
+        "directives": [
+            {
+                "type": "AudioPlayer.ClearQueue",
+                "clearBehavior": "CLEAR_ENQUEUED"
+            }
+        ]
+    }
+}

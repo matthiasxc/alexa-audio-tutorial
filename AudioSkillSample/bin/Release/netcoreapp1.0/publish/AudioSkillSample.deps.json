@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v1.0",
-    "signature": "2e0f9807fcb9698b2fbef3e398b677111d419cb2"
+    "signature": "1ded5550fcc3c1a85fddec98fdc5d1191065640b"
   },
   "compilationOptions": {},
   "targets": {
@@ -10,15 +10,15 @@
         "dependencies": {
           "Amazon.Lambda.Core": "1.0.0",
           "Amazon.Lambda.Serialization.Json": "1.0.1",
-          "Alexa.NET": "1.0.0-beta-4",
           "Newtonsoft.Json": "9.0.1",
-          "AWSSDK.DynamoDBv2": "3.3.4.3"
+          "AWSSDK.DynamoDBv2": "3.3.4.3",
+          "Alexa.NET": "1.0.0-beta-5"
         },
         "runtime": {
           "AudioSkillSample.dll": {}
         }
       },
-      "Alexa.NET/1.0.0-beta-4": {
+      "Alexa.NET/1.0.0-beta-5": {
         "dependencies": {
           "Newtonsoft.Json": "9.0.1"
         },
@@ -125,10 +125,10 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Alexa.NET/1.0.0-beta-4": {
+    "Alexa.NET/1.0.0-beta-5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OgMB/ox3cxiuUTObcRD3m2WXvF+iRriJZ0bFQMpllrWjc4c7VP9IElaE8RBJ6dzi86E08ccNRJNo8CVNwr02rg=="
+      "sha512": "sha512-uRUDpngIX5K39FuLUp50C7cVj0U5bDjSsIabIbBTMu/4bo9zxaavIXFED8I9ZgzDegACcrAA9kSX0YMoHRXAFQ=="
     },
     "Amazon.Lambda.Core/1.0.0": {
       "type": "package",
