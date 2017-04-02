@@ -43,8 +43,7 @@ namespace AudioSkillSample
                 userId = input.Session.User.UserId;
             else
                 userId = input.Context.System.User.UserId;
-
-            
+                        
             var lastState = await audioStateHelper.GetAudioState(userId);
 
             var currentState = new AudioState() { UserId = userId };
@@ -81,6 +80,7 @@ namespace AudioSkillSample
                     case "PlayAudio":
                         currentState.State.Token = audioItems.FirstOrDefault().Title;
                         currentState.State.State = "PLAY_MODE";
+                        currentState.State.Index = 0;
                         currentState.State.playOrder = new List<int> { 0, 1, 2, 3, 4 };
                         returnResponse = ResponseBuilder.AudioPlayerPlay(
                             PlayBehavior.ReplaceAll, 
@@ -293,18 +293,18 @@ namespace AudioSkillSample
 
             // I use the following code to validate and log my outputs for
             //      later investigation
-            log.LogLine($"Skill Response Object...");
-            string responseJson = "no response is given";
-            try
-            {
-                responseJson = JsonConvert.SerializeObject(returnResponse);
-            }
-            catch
-            {
-                log.LogLine(responseJson);
-                return null;
-            }
-            log.LogLine(responseJson);
+            //log.LogLine($"Skill Response Object...");
+            //string responseJson = "no response is given";
+            //try
+            //{
+            //    responseJson = JsonConvert.SerializeObject(returnResponse);
+            //}
+            //catch
+            //{
+            //    log.LogLine(responseJson);
+            //    return null;
+            //}
+            //log.LogLine(responseJson);
 
             // Save our state
             await audioStateHelper.SaveAudioState(currentState);
