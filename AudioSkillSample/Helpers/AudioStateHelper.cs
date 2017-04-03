@@ -16,11 +16,8 @@ namespace AudioSkillSample.Helpers
 {
     public class AudioStateHelper
     {
-        private string accessKey = "AKIAJOQ4PQKYSMBZSCAA";
-        private string secretKey = "ZmCcTX83fut96qfpHmgn2CyGUDOYq4mttZnl0UpD";
-
-        //private string accessKey = "[your access key for dynamoDB permissions goes here]";
-        //private string secretKey = "[your secret key for dynamoDB permissions goes here]";
+        private string accessKey = "[your access key for dynamoDB goes here]";
+        private string secretKey = "[your secret key for dynamoDB goes here]";
 
         private static string dynamoDBTableName = "AudioStates";
         private static string hashKey = "UserId";

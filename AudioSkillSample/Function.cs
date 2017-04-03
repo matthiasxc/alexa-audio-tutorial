@@ -28,8 +28,8 @@ namespace AudioSkillSample
             var log = context.Logger;
             // I use the following lines to log and validate my input
             //      but this isn't a requirement for the skill
-            log.LogLine($"Skill Request Object...");
-            log.LogLine(JsonConvert.SerializeObject(input));
+            //log.LogLine($"Skill Request Object...");
+            //log.LogLine(JsonConvert.SerializeObject(input));
 
             SkillResponse returnResponse = new SkillResponse();
             var audioItems = AudioAssets.GetSampleAudioFiles();
